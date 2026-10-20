@@ -1,0 +1,15 @@
+:root {
+  color-scheme: dark;
+  --color-page: #101e1b;
+  --color-surface: #172923;
+  --color-surface-raised: #21362e;
+  --color-text: #e9f2df;
+  --color-text-muted: #b3c2b8;
+  --color-accent: #d4f483;
+  --color-action: #f09a78;
+  --color-focus: #b4dcff;
+  --color-line: #40584e;
+  --color-correct: #456138;
+  --color-present: #5d4b26;
+  --color-absent: #34443d;
+}

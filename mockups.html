@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f3ee">
+  <title>Termo-2 — conceitos de interface</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      --ink: #182421;
+      --muted: #68736f;
+      --line: #dfe4dd;
+      --paper: #f5f3ee;
+      --surface: #fffefa;
+      --green: #badd67;
+      --amber: #f2bd55;
+      --absent: #e3e6df;
+      --coral: #d8634c;
+      --focus: #275dde;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: #f3f5f3; }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, a:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 3px;
+    }
+    .page-shell { width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 32px 0 64px; }
+    .intro { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 24px; }
+    .eyebrow { margin: 0 0 8px; color: #58645f; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(28px, 4vw, 42px); letter-spacing: -.045em; }
+    .intro-copy { max-width: 525px; margin: 10px 0 0; color: #5e6964; line-height: 1.6; }
+    .concept-count { flex: 0 0 auto; padding: 9px 13px; border: 1px solid #d9dfd9; border-radius: 999px; background: white; color: #49534e; font-size: 13px; font-weight: 700; }
+    .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; padding: 6px; border: 1px solid #e0e5df; border-radius: 16px; background: #e9ede8; }
+    .tab { min-height: 52px; border: 0; border-radius: 11px; background: transparent; color: #56615c; font-weight: 750; transition: background .15s, color .15s, box-shadow .15s; }
+    .tab[aria-selected="true"] { background: white; color: #19241f; box-shadow: 0 2px 8px #1d30221a; }
+    .stage { min-height: 700px; overflow: hidden; border: 1px solid #dfe3dd; border-radius: 22px; background: white; box-shadow: 0 20px 60px #26362d12; }
+    .prototype { display: none; min-height: 700px; }
+    .prototype.is-active { display: block; }
+    .prototype-label { display: flex; align-items: center; gap: 10px; padding: 14px 22px; border-bottom: 1px solid #e6e8e4; background: #fbfcfa; color: #52605a; font-size: 12px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+    .prototype-label span { padding: 4px 8px; border-radius: 999px; background: #e9eee9; color: #3c4942; letter-spacing: 0; }
+    .demo { min-height: 656px; padding: 28px; }
+    .demo-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .brand { font-size: 18px; font-weight: 900; letter-spacing: -.035em; }
+    .brand small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; font-weight: 650; letter-spacing: .02em; }
+    .head-actions { display: flex; align-items: center; gap: 8px; }
+    .pill, .quiet-button, .primary-button, .language-button {
+      min-height: 40px; border: 1px solid var(--line); border-radius: 10px; background: white; color: var(--ink); font-weight: 700;
+    }
+    .pill { padding: 0 12px; font-size: 13px; }
+    .quiet-button { padding: 0 13px; }
+    .primary-button { padding: 0 17px; border-color: var(--coral); background: var(--coral); color: white; }
+    .language-button[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: white; }
+    .language-group { display: flex; gap: 5px; padding: 4px; border: 1px solid var(--line); border-radius: 13px; background: white; }
+    .language-button { min-height: 32px; padding: 0 9px; border-color: transparent; border-radius: 8px; font-size: 12px; }
+    .demo-layout { display: grid; grid-template-columns: minmax(0, 1fr) 228px; gap: 28px; max-width: 920px; margin: 36px auto 0; }
+    .game-area { min-width: 0; }
+    .game-title-row { display: flex; align-items: start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+    .game-title { margin: 0; font-size: 24px; letter-spacing: -.04em; }
+    .game-subtitle { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+    .save-state { padding: 7px 9px; border-radius: 8px; background: #edf4e5; color: #36542e; font-size: 11px; font-weight: 750; white-space: nowrap; }
+    .board { display: grid; gap: 8px; width: fit-content; max-width: 100%; margin: 0 auto 16px; }
+    .guess-row { display: grid; grid-template-columns: repeat(var(--word-length, 5), minmax(38px, 48px)); gap: 7px; }
+    .tile {
+      display: grid; position: relative; place-items: center; width: clamp(38px, 8vw, 48px); aspect-ratio: 1;
+      border: 1.5px solid #cbd2ca; border-radius: 9px; background: #fffefa; color: #19251f; font-family: ui-monospace, "Cascadia Code", monospace; font-size: 22px; font-weight: 850;
+    }
+    .tile.correct { border-color: #799b37; background: var(--green); }
+    .tile.present { border-color: #a87416; background: var(--amber); }
+    .tile.absent { border-color: #b6bcb3; background: var(--absent); }
+    .tile-symbol { position: absolute; right: 3px; bottom: 0; font-family: sans-serif; font-size: 9px; font-weight: 900; line-height: 1; }
+    .guess-form { display: flex; justify-content: center; gap: 8px; margin: 18px auto 0; }
+    .guess-input { width: min(245px, 62%); min-height: 46px; padding: 0 13px; border: 1.5px solid #bbc5bc; border-radius: 10px; background: white; font-family: ui-monospace, "Cascadia Code", monospace; font-size: 17px; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
+    .message { min-height: 22px; margin: 10px 0 0; text-align: center; color: #46544c; font-size: 13px; font-weight: 650; }
+    .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 14px; margin: 18px auto 0; color: #53605a; font-size: 11px; }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-symbol { display: grid; place-items: center; width: 18px; height: 18px; border: 1px solid #aab4aa; border-radius: 5px; font-weight: 900; }
+    .legend-symbol.correct { background: var(--green); }
+    .legend-symbol.present { background: var(--amber); }
+    .legend-symbol.absent { background: var(--absent); }
+    .side-card { align-self: start; padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: #fbfcf9; }
+    .side-card h3 { margin: 0 0 12px; font-size: 14px; }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .stat { padding: 10px; border-radius: 10px; background: white; }
+    .stat strong { display: block; font-size: 21px; }
+    .stat span { color: var(--muted); font-size: 10px; }
+    .side-note { margin: 14px 0 0; color: #68736f; font-size: 11px; line-height: 1.5; }
+    .prototype-footer { max-width: 920px; margin: 24px auto 0; color: #68736f; font-size: 12px; line-height: 1.55; }
+    .prototype-footer strong { color: #3b4841; }
+
+    /* Concept 1: an airy field notebook, optimized around an obvious next action. */
+    .ux-concept { background: #f5f2e9; }
+    .ux-concept .demo { background: radial-gradient(ellipse at 20% 5%, #fff9e9, transparent 40%), #f5f2e9; }
+    .ux-concept .brand { color: #254a42; }
+    .ux-concept .game-title { color: #223a34; }
+    .ux-concept .side-card { background: #fffdf6; }
+    .ux-concept .tile { border-radius: 5px; }
+
+    /* Concept 2: a high-contrast, text-forward experience with explicit status. */
+    .a11y-concept { background: #f5f7fa; }
+    .a11y-concept .demo { background: #f5f7fa; }
+    .a11y-concept .brand { color: #063b70; }
+    .a11y-concept .demo-layout { grid-template-columns: minmax(0, 1fr) 220px; }
+    .a11y-concept .tile { border: 2px solid #414b56; border-radius: 3px; }
+    .a11y-concept .tile.correct { border-color: #075d31; background: #d8f3df; }
+    .a11y-concept .tile.present { border-color: #754600; background: #fff0bf; }
+    .a11y-concept .tile.absent { border-color: #505963; background: #e1e5ea; }
+    .a11y-concept .tile-symbol { position: static; display: inline; margin-left: 4px; font-size: 11px; }
+    .a11y-concept .legend { justify-content: flex-start; gap: 8px; }
+    .a11y-concept .legend-item { padding: 5px 8px; border: 1px solid #bcc5cf; border-radius: 7px; background: white; color: #182531; font-size: 12px; }
+    .a11y-concept .legend-symbol { border-radius: 3px; }
+    .a11y-concept .primary-button { border-color: #004b87; background: #004b87; }
+    .a11y-concept .side-card { border: 2px solid #8b99a7; background: white; }
+    .a11y-concept .save-state { background: #e2f3e6; color: #174a27; }
+
+    /* Concept 3: the "tuning station" gives the same puzzle a distinctive mood. */
+    .radio-concept { color: #e9f2df; background: #101e1b; }
+    .radio-concept .prototype-label { border-color: #29403a; background: #172823; color: #a8bfb3; }
+    .radio-concept .prototype-label span { background: #28443a; color: #dcf0da; }
+    .radio-concept .demo { background: radial-gradient(ellipse at 50% 0%, #214137, transparent 55%), #101e1b; }
+    .radio-concept .brand { color: #d4f483; }
+    .radio-concept .brand small, .radio-concept .game-subtitle, .radio-concept .side-note, .radio-concept .prototype-footer { color: #a8b8ad; }
+    .radio-concept .game-title { color: #f2f6e8; }
+    .radio-concept .pill, .radio-concept .quiet-button, .radio-concept .language-group, .radio-concept .language-button:not([aria-pressed="true"]), .radio-concept .guess-input, .radio-concept .side-card, .radio-concept .stat { border-color: #40584e; background: #172923; color: #e9f2df; }
+    .radio-concept .language-button[aria-pressed="true"] { border-color: #d4f483; background: #d4f483; color: #15231c; }
+    .radio-concept .primary-button { border-color: #db765a; background: #db765a; }
+    .radio-concept .tile { border-color: #486157; background: #172923; color: #eef4e7; }
+    .radio-concept .tile.correct { border-color: #d4f483; background: #456138; color: #f4ffe0; }
+    .radio-concept .tile.present { border-color: #f6c960; background: #5d4b26; color: #fff4d0; }
+    .radio-concept .tile.absent { border-color: #50615a; background: #34443d; color: #d3dcd4; }
+    .radio-concept .legend, .radio-concept .message { color: #c2d0c4; }
+    .radio-concept .legend-symbol { border-color: #72847b; }
+    .radio-concept .legend-symbol.correct { background: #456138; }
+    .radio-concept .legend-symbol.present { background: #5d4b26; }
+    .radio-concept .legend-symbol.absent { background: #34443d; }
+    .radio-concept .side-card { background: #172923; }
+    .radio-concept .stat { background: #21362e; }
+    .radio-concept .stat span { color: #a8b8ad; }
+    .radio-concept .save-state { background: #304b37; color: #e0f5b6; }
+    .radio-concept .prototype-footer strong { color: #e0f5b6; }
+
+    @media (max-width: 760px) {
+      .page-shell { width: min(100% - 24px, 600px); padding-top: 22px; }
+      .intro { align-items: start; }
+      .concept-count { display: none; }
+      .tabs { grid-template-columns: 1fr; }
+      .tab { min-height: 44px; text-align: left; padding: 0 14px; }
+      .stage, .prototype { min-height: unset; }
+      .demo { min-height: 720px; padding: 21px 15px; }
+      .demo-head { align-items: start; }
+      .head-actions { flex-wrap: wrap; justify-content: end; }
+      .demo-layout, .a11y-concept .demo-layout { grid-template-columns: 1fr; gap: 18px; margin-top: 28px; }
+      .side-card { order: 2; }
+      .game-area { order: 1; }
+      .game-title { font-size: 21px; }
+      .save-state { white-space: normal; text-align: center; }
+      .guess-row { grid-template-columns: repeat(var(--word-length, 5), minmax(32px, 1fr)); gap: 5px; }
+      .tile { width: min(13vw, 44px); font-size: 19px; }
+      .guess-form { gap: 6px; }
+      .guess-input { min-width: 0; width: 58%; }
+      .primary-button { padding-inline: 12px; }
+      .prototype-footer { margin-top: 18px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page-shell">
+    <header class="intro">
+      <div>
+        <p class="eyebrow">Termo-2 · exploração de interface</p>
+        <h1>Três caminhos para jogar.</h1>
+        <p class="intro-copy">Protótipos navegáveis elaborados a partir do PRD. Alterne entre as propostas, troque o idioma e teste um palpite para comparar fluxo, acessibilidade e linguagem visual.</p>
+      </div>
+      <span class="concept-count">3 conceitos · demo interativa</span>
+    </header>
+
+    <nav class="tabs" role="tablist" aria-label="Escolha um conceito de interface">
+      <button class="tab" id="tab-ux" role="tab" aria-selected="true" aria-controls="prototype-ux" data-tab="ux">01 · Caderno de pistas</button>
+      <button class="tab" id="tab-a11y" role="tab" aria-selected="false" aria-controls="prototype-a11y" data-tab="a11y" tabindex="-1">02 · Acessibilidade primeiro</button>
+      <button class="tab" id="tab-radio" role="tab" aria-selected="false" aria-controls="prototype-radio" data-tab="radio" tabindex="-1">03 · Estação de sintonia</button>
+    </nav>
+
+    <section class="stage" aria-label="Protótipo selecionado">
+      <article class="prototype ux-concept is-active" id="prototype-ux" role="tabpanel" aria-labelledby="tab-ux" data-prototype="ux">
+        <div class="prototype-label">Conceito UX <span>Palavra em Pista</span></div>
+        <div class="demo">
+          <header class="demo-head">
+            <div class="brand">palavra em pista<small>um desafio para a pausa</small></div>
+            <div class="head-actions">
+              <div class="language-group" role="group" aria-label="Idioma da partida">
+                <button class="language-button" data-language="pt" aria-pressed="true">PT-BR</button>
+                <button class="language-button" data-language="en" aria-pressed="false">EN</button>
+              </div>
+              <button class="quiet-button" data-new-game>Nova partida</button>
+            </div>
+          </header>
+          <div class="demo-layout">
+            <section class="game-area" aria-label="Partida">
+              <div class="game-title-row">
+                <div><h2 class="game-title">Encontre a palavra</h2><p class="game-subtitle" data-game-meta>Português (Brasil) · palavra de 5 letras · 6 tentativas</p></div>
+                <span class="save-state" data-save-status>Partida salva</span>
+              </div>
+              <div class="board" data-board aria-label="Tabuleiro de tentativas"></div>
+              <form class="guess-form" data-guess-form>
+                <label class="sr-only" for="guess-ux">Seu palpite</label>
+                <input class="guess-input" id="guess-ux" data-guess-input autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="8" placeholder="PALAVRA" aria-describedby="message-ux">
+                <button class="primary-button" type="submit">Enviar</button>
+              </form>
+              <p class="message" id="message-ux" data-message aria-live="polite">3 de 6 tentativas usadas.</p>
+              <div class="legend" aria-label="Legenda das pistas">
+                <span class="legend-item"><span class="legend-symbol correct" aria-hidden="true">✓</span> Posição certa</span>
+                <span class="legend-item"><span class="legend-symbol present" aria-hidden="true">↗</span> Outra posição</span>
+                <span class="legend-item"><span class="legend-symbol absent" aria-hidden="true">—</span> Não aparece</span>
+              </div>
+            </section>
+            <aside class="side-card" aria-label="Estatísticas do protótipo">
+              <h3>Seu caderno</h3>
+              <div class="stat-grid">
+                <div class="stat"><strong data-stat="played">12</strong><span>Partidas</span></div>
+                <div class="stat"><strong data-stat="win">75%</strong><span>Vitórias</span></div>
+                <div class="stat"><strong data-stat="streak">4</strong><span>Sequência</span></div>
+                <div class="stat"><strong data-stat="best">8</strong><span>Melhor</span></div>
+              </div>
+              <p class="side-note">Estatísticas locais de demonstração. O produto não exige uma conta.</p>
+            </aside>
+          </div>
+          <p class="prototype-footer"><strong>Ênfase:</strong> fluxo familiar, próximo passo evidente e estatísticas ao lado do tabuleiro. A troca de idioma preserva a partida pausada.</p>
+        </div>
+      </article>
+
+      <article class="prototype a11y-concept" id="prototype-a11y" role="tabpanel" aria-labelledby="tab-a11y" data-prototype="a11y" hidden>
+        <div class="prototype-label">Conceito de acessibilidade <span>Termo: pistas que se leem</span></div>
+        <div class="demo">
+          <header class="demo-head">
+            <div class="brand">TERMO <small>cada pista, em mais de um jeito</small></div>
+            <div class="head-actions">
+              <button class="quiet-button" data-stats>Estatísticas</button>
+              <div class="language-group" role="group" aria-label="Idioma da partida">
+                <button class="language-button" data-language="pt" aria-pressed="true">PT-BR</button>
+                <button class="language-button" data-language="en" aria-pressed="false">EN</button>
+              </div>
+            </div>
+          </header>
+          <div class="demo-layout">
+            <section class="game-area" aria-label="Partida">
+              <div class="game-title-row">
+                <div><h2 class="game-title">Sua palavra tem 5 letras</h2><p class="game-subtitle" data-game-meta>Português (Brasil) · 3 de 6 tentativas usadas</p></div>
+                <span class="save-state" data-save-status>Salvo neste dispositivo</span>
+              </div>
+              <div class="board" data-board aria-label="Tabuleiro de tentativas"></div>
+              <form class="guess-form" data-guess-form>
+                <label class="sr-only" for="guess-a11y">Digite seu palpite de 5 letras</label>
+                <input class="guess-input" id="guess-a11y" data-guess-input autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="8" placeholder="Seu palpite" aria-describedby="message-a11y">
+                <button class="primary-button" type="submit">Enviar palpite</button>
+              </form>
+              <p class="message" id="message-a11y" data-message aria-live="polite">Digite uma palavra com 5 letras. Palpites inválidos não gastam tentativas.</p>
+              <div class="legend" aria-label="Legenda permanente das pistas">
+                <span class="legend-item"><span class="legend-symbol correct" aria-hidden="true">✓</span> Posição certa</span>
+                <span class="legend-item"><span class="legend-symbol present" aria-hidden="true">↔</span> Está na palavra</span>
+                <span class="legend-item"><span class="legend-symbol absent" aria-hidden="true">×</span> Não está na palavra</span>
+              </div>
+            </section>
+            <aside class="side-card" aria-label="Ajuda e progresso">
+              <h3>Como ler as pistas</h3>
+              <p class="side-note">Cada letra tem cor e símbolo. O resultado também é anunciado após o palpite; não depende só da cor.</p>
+              <div class="stat-grid" style="margin-top:14px">
+                <div class="stat"><strong>3/6</strong><span>Tentativas usadas</span></div>
+                <div class="stat"><strong>PT</strong><span>Idioma ativo</span></div>
+              </div>
+              <p class="side-note" data-access-note>Teclado: digite sua palavra e pressione Enter. O foco permanece visível nos controles.</p>
+            </aside>
+          </div>
+          <p class="prototype-footer"><strong>Ênfase:</strong> contraste alto, instrução permanente, foco visível, rótulos claros e anúncio de estado para tecnologias assistivas.</p>
+        </div>
+      </article>
+
+      <article class="prototype radio-concept" id="prototype-radio" role="tabpanel" aria-labelledby="tab-radio" data-prototype="radio" hidden>
+        <div class="prototype-label">Conceito visual <span>Termó-2 · estação de sintonia</span></div>
+        <div class="demo">
+          <header class="demo-head">
+            <div class="brand">TERMÓ-2<small>Sintonize a palavra</small></div>
+            <div class="head-actions">
+              <div class="language-group" role="group" aria-label="Idioma da partida">
+                <button class="language-button" data-language="pt" aria-pressed="true">PT-BR</button>
+                <button class="language-button" data-language="en" aria-pressed="false">EN</button>
+              </div>
+              <button class="quiet-button" data-new-game>Recomeçar</button>
+            </div>
+          </header>
+          <div class="demo-layout">
+            <section class="game-area" aria-label="Partida">
+              <div class="game-title-row">
+                <div><h2 class="game-title">Frequência da palavra</h2><p class="game-subtitle" data-game-meta>PT-BR · 5 letras · 6 tentativas</p></div>
+                <span class="save-state" data-save-status>● Sinal salvo</span>
+              </div>
+              <div class="board" data-board aria-label="Tabuleiro de tentativas"></div>
+              <form class="guess-form" data-guess-form>
+                <label class="sr-only" for="guess-radio">Digite seu palpite</label>
+                <input class="guess-input" id="guess-radio" data-guess-input autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="8" placeholder="SUA PALAVRA" aria-describedby="message-radio">
+                <button class="primary-button" type="submit">Sintonizar</button>
+              </form>
+              <p class="message" id="message-radio" data-message aria-live="polite">Ajuste a frequência com seu próximo palpite.</p>
+              <div class="legend" aria-label="Legenda das pistas">
+                <span class="legend-item"><span class="legend-symbol correct" aria-hidden="true">●</span> Na posição</span>
+                <span class="legend-item"><span class="legend-symbol present" aria-hidden="true">↗</span> Outra posição</span>
+                <span class="legend-item"><span class="legend-symbol absent" aria-hidden="true">—</span> Ruído / ausente</span>
+              </div>
+            </section>
+            <aside class="side-card" aria-label="Sua frequência">
+              <h3>Sua frequência</h3>
+              <div class="stat-grid">
+                <div class="stat"><strong>12</strong><span>Rodadas</span></div>
+                <div class="stat"><strong>9</strong><span>Acertos</span></div>
+                <div class="stat"><strong>4</strong><span>Sequência</span></div>
+                <div class="stat"><strong>02:14</strong><span>Tempo médio</span></div>
+              </div>
+              <p class="side-note">Trocar de idioma pausa esta sintonia para você voltar depois.</p>
+            </aside>
+          </div>
+          <p class="prototype-footer"><strong>Ênfase:</strong> identidade de “rádio de mesa”, paleta escura, acentos luminosos e linguagem de sintonia sem esconder as instruções do jogo.</p>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const words = {
+        pt: { name: "Português (Brasil)", short: "PT-BR", length: 5, answers: ["TERMO", "LIVRO", "FESTA", "NUVEM"], valid: ["TERMO", "MUNDO", "PODER", "TERNO", "TERRA", "LIVRO", "FESTA", "NUVEM", "PRATO", "FAROL", "PORTA", "CANTO", "LETRA"] },
+        en: { name: "English", short: "EN", length: 5, answers: ["PLANT", "BRAVE", "LIGHT", "SMILE"], valid: ["CRANE", "SOUND", "PLANK", "PLANT", "BRAVE", "LIGHT", "SMILE", "CRISP", "STONE", "HEART", "TRAIL", "BLEND"] }
+      };
+      const states = {};
+      const normalize = (text) => text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleUpperCase();
+      const evaluate = (guess, answer) => {
+        const g = [...normalize(guess)];
+        const a = [...normalize(answer)];
+        const result = Array(g.length).fill("absent");
+        const remaining = {};
+        for (let i = 0; i < a.length; i++) {
+          if (g[i] === a[i]) result[i] = "correct";
+          else remaining[a[i]] = (remaining[a[i]] || 0) + 1;
+        }
+        for (let i = 0; i < g.length; i++) {
+          if (result[i] === "correct") continue;
+          if (remaining[g[i]]) {
+            result[i] = "present";
+            remaining[g[i]]--;
+          }
+        }
+        return result;
+      };
+      const symbol = { correct: "✓", present: "↗", absent: "—" };
+      const label = { correct: "posição correta", present: "presente em outra posição", absent: "não aparece na resposta" };
+      const initialGuesses = { pt: ["MUNDO", "PODER", "TERNO"], en: ["CRANE", "SOUND", "PLANK"] };
+
+      document.querySelectorAll("[data-prototype]").forEach((prototype) => {
+        const id = prototype.dataset.prototype;
+        states[id] = {};
+        ["pt", "en"].forEach((lang) => {
+          const answer = words[lang].answers[0];
+          const guesses = initialGuesses[lang].map((guess) => ({ word: guess, result: evaluate(guess, answer) }));
+          states[id][lang] = { answer, guesses, finished: false, next: 1 };
+        });
+      });
+
+      function currentLanguage(prototype) {
+        return prototype.querySelector('[data-language][aria-pressed="true"]').dataset.language;
+      }
+
+      function render(prototype) {
+        const id = prototype.dataset.prototype;
+        const lang = currentLanguage(prototype);
+        const game = states[id][lang];
+        const config = words[lang];
+        const board = prototype.querySelector("[data-board]");
+        const message = prototype.querySelector("[data-message]");
+        const input = prototype.querySelector("[data-guess-input]");
+        board.replaceChildren();
+        board.style.setProperty("--word-length", config.length);
+
+        for (let row = 0; row < 6; row++) {
+          const rowElement = document.createElement("div");
+          rowElement.className = "guess-row";
+          rowElement.setAttribute("role", "group");
+          rowElement.setAttribute("aria-label", `Tentativa ${row + 1}`);
+          for (let col = 0; col < config.length; col++) {
+            const tile = document.createElement("span");
+            tile.className = "tile";
+            const guess = game.guesses[row];
+            if (guess) {
+              const state = guess.result[col];
+              tile.classList.add(state);
+              tile.textContent = guess.word[col];
+              tile.setAttribute("aria-label", `${guess.word[col]}, ${label[state]}`);
+              const mark = document.createElement("span");
+              mark.className = "tile-symbol";
+              mark.setAttribute("aria-hidden", "true");
+              mark.textContent = symbol[state];
+              tile.append(mark);
+            } else {
+              tile.setAttribute("aria-hidden", "true");
+            }
+            rowElement.append(tile);
+          }
+          board.append(rowElement);
+        }
+
+        prototype.querySelectorAll("[data-language]").forEach((button) => {
+          button.setAttribute("aria-pressed", String(button.dataset.language === lang));
+        });
+        prototype.querySelector("[data-game-meta]").textContent =
+          id === "a11y"
+            ? `${config.name} · ${game.guesses.length} de 6 tentativas usadas`
+            : id === "radio"
+              ? `${config.short} · ${config.length} letras · ${6 - game.guesses.length} tentativas restantes`
+              : `${config.name} · palavra de ${config.length} letras · 6 tentativas`;
+        const status = prototype.querySelector("[data-save-status]");
+        if (status) status.textContent = game.finished ? "Partida concluída" : (id === "radio" ? "● Sinal salvo" : (id === "a11y" ? "Salvo neste dispositivo" : "Partida salva"));
+        if (game.finished) {
+          message.textContent = normalize(game.guesses.at(-1).word) === normalize(game.answer)
+            ? `Palavra encontrada em ${game.guesses.length} tentativa(s)!`
+            : `Fim de jogo. A resposta era ${game.answer}.`;
+        } else if (id === "a11y") {
+          message.textContent = `Digite uma palavra com ${config.length} letras. Palpites inválidos não gastam tentativas.`;
+        } else if (game.guesses.length) {
+          message.textContent = `${game.guesses.length} de 6 tentativas usadas.`;
+        } else {
+          message.textContent = "Partida pronta. Digite seu primeiro palpite.";
+        }
+        input.maxLength = config.length;
+        input.placeholder = id === "radio" ? "SUA PALAVRA" : "PALAVRA";
+        const completed = game.finished;
+        input.disabled = completed;
+        prototype.querySelector(".guess-form button").disabled = completed;
+      }
+
+      document.querySelectorAll("[data-prototype]").forEach((prototype) => {
+        render(prototype);
+        prototype.querySelectorAll("[data-language]").forEach((button) => {
+          button.addEventListener("click", () => {
+            prototype.querySelector("[data-message]").textContent = `Partida ${words[currentLanguage(prototype)].name} pausada.`;
+            const nextLang = button.dataset.language;
+            prototype.querySelectorAll("[data-language]").forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+            render(prototype);
+            if (prototype.dataset.prototype === "a11y") {
+              prototype.querySelector("[data-message]").textContent =
+                `Partida ${words[nextLang].name} retomada. ${states[prototype.dataset.prototype][nextLang].guesses.length} tentativas usadas.`;
+            }
+          });
+        });
+        prototype.querySelector("[data-guess-form]").addEventListener("submit", (event) => {
+          event.preventDefault();
+          const lang = currentLanguage(prototype);
+          const config = words[lang];
+          const game = states[prototype.dataset.prototype][lang];
+          const input = prototype.querySelector("[data-guess-input]");
+          const guess = normalize(input.value.trim());
+          const message = prototype.querySelector("[data-message]");
+          if ([...guess].length !== config.length) {
+            message.textContent = `Digite uma palavra com exatamente ${config.length} letras.`;
+            input.focus();
+            return;
+          }
+          if (!/^\p{L}+$/u.test(input.value.trim())) {
+            message.textContent = "Use apenas letras, sem espaços ou símbolos.";
+            input.focus();
+            return;
+          }
+          if (!words[lang].valid.includes(guess)) {
+            message.textContent = "Este protótipo aceita apenas algumas palavras de demonstração.";
+            input.focus();
+            return;
+          }
+          if (game.guesses.length >= 6 || game.finished) return;
+          game.guesses.push({ word: guess, result: evaluate(guess, game.answer) });
+          game.finished = normalize(guess) === normalize(game.answer) || game.guesses.length === 6;
+          input.value = "";
+          render(prototype);
+          prototype.querySelector("[data-message]").focus?.();
+          input.focus();
+        });
+        prototype.querySelectorAll("[data-new-game]").forEach((button) => {
+          button.addEventListener("click", () => {
+            const lang = currentLanguage(prototype);
+            const game = states[prototype.dataset.prototype][lang];
+            if (game.guesses.length && !game.finished && !window.confirm("Começar outra partida substituirá a partida atual neste idioma. Continuar?")) return;
+            const nextAnswer = words[lang].answers[game.next % words[lang].answers.length];
+            states[prototype.dataset.prototype][lang] = { answer: nextAnswer, guesses: [], finished: false, next: game.next + 1 };
+            render(prototype);
+            prototype.querySelector("[data-guess-input]").focus();
+          });
+        });
+        prototype.querySelector("[data-stats]")?.addEventListener("click", () => {
+          window.alert("As estatísticas são locais e separadas por idioma. Esta tela é uma demonstração visual.");
+        });
+      });
+
+      const tabs = [...document.querySelectorAll('[role="tab"]')];
+      tabs.forEach((tab, index) => {
+        tab.addEventListener("click", () => activateTab(tab));
+        tab.addEventListener("keydown", (event) => {
+          const direction = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
+          if (!direction) return;
+          event.preventDefault();
+          const next = tabs[(index + direction + tabs.length) % tabs.length];
+          activateTab(next);
+          next.focus();
+        });
+      });
+      function activateTab(tab) {
+        tabs.forEach((item) => {
+          const selected = item === tab;
+          item.setAttribute("aria-selected", String(selected));
+          item.tabIndex = selected ? 0 : -1;
+          const panel = document.getElementById(item.getAttribute("aria-controls"));
+          panel.hidden = !selected;
+          panel.classList.toggle("is-active", selected);
+        });
+      }
+    })();
+  </script>
+  <style>
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+    }
+    button:disabled, input:disabled { cursor: not-allowed; opacity: .68; }
+  </style>
+</body>
+</html>
