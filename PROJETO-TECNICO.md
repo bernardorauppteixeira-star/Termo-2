@@ -205,12 +205,12 @@ Contar **letras percebidas pelo usuário**, não unidades UTF-16. Usar `Intl.Seg
 Normalizar primeiro para NFC para armazenar/exibir consistentemente. Para comparar:
 
 - Converter a entrada em maiúsculas sem alterar idioma escolhido.
-- Em português, remover marcas diacríticas Unicode e tratar `Ç` como `C`, conforme o PRD.
+- Em português, remover marcas diacríticas Unicode e tratar `Ç` como `C`, conforme o PRD. Validar palpites contra a lista ampliada offline, derivada do dicionário VERO/LibreOffice; respostas continuam curadas separadamente.
 - Em inglês, comparar letras sem distinção de caixa e aceitar apenas entradas da lista inglesa.
 - Preservar a grafia original da resposta para exibição, mesmo quando a equivalência normalizada for usada na comparação.
 - Não aceitar espaços, hífens, apóstrofos, dígitos ou símbolos nos palpites.
 
-A regra de equivalência de acentos se aplica ao feedback e comparação da solução. A lista de palpites deve definir explicitamente quais grafias são válidas. Para o MVP, recomenda-se incluir variantes sem acento aceitas no português quando correspondam a palavras válidas, sem transformar qualquer sequência normalizada em um palpite válido automaticamente.
+A regra de equivalência de acentos se aplica ao feedback e comparação da solução. A lista portuguesa é normalizada sem diacríticos a partir do dicionário offline documentado em `src/data/README.md`; por ser finita, ela pode não incluir todas as flexões e neologismos. Não aceitar qualquer sequência normalizada automaticamente.
 
 ### 7.2 Validação de palpite
 

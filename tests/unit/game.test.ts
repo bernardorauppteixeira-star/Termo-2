@@ -5,6 +5,43 @@ import type { WordList } from "../../src/domain/types";
 import { wordLists } from "../../src/data/wordLists";
 
 describe("game flow", () => {
+  it("accepts Portuguese dictionary words outside the curated guess list", () => {
+    const answerList: WordList = {
+      answers: ["MISTURA"],
+      validGuesses: new Set(["MISTURA"]),
+      minLength: 7,
+      maxLength: 7,
+    };
+    const state = startGame(createInitialState(), "pt-BR", answerList, {
+      id: () => "game-dictionary",
+      now: () => 10,
+      random: () => 0,
+    });
+
+    const result = submitGuess(state, "ABOBORA", wordLists["pt-BR"].validGuesses);
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("continues to reject English words outside the curated guess list", () => {
+    const list: WordList = {
+      answers: ["APPLE"],
+      validGuesses: new Set(["APPLE"]),
+      minLength: 5,
+      maxLength: 5,
+    };
+    const state = startGame(createInitialState(), "en", list, {
+      id: () => "game-english-list",
+      now: () => 10,
+      random: () => 0,
+    });
+
+    expect(submitGuess(state, "ZEBRA", list.validGuesses)).toEqual({
+      ok: false,
+      error: "unknown",
+    });
+  });
+
   it("rejects invalid guesses without using an attempt", () => {
     let state = startGame(createInitialState(), "pt-BR", wordLists["pt-BR"], {
       id: () => "game-1",
@@ -107,5 +144,14 @@ describe("word list integrity", () => {
     expect(list.answers.length).toBeGreaterThan(0);
     expect(list.answers.every((word) => word.length >= list.minLength && word.length <= list.maxLength)).toBe(true);
     expect(list.answers.every((word) => list.validGuesses.has(word.normalize("NFD").replace(/\p{M}/gu, "")) || list.validGuesses.has(word))).toBe(true);
+  });
+
+  it("includes words from the offline Portuguese dictionary", () => {
+    const guesses = wordLists["pt-BR"].validGuesses;
+
+    expect(guesses.has("ABOBORA")).toBe(true);
+    expect(guesses.has("XICARA")).toBe(true);
+    expect(guesses.has("FOSFORO")).toBe(true);
+    expect(guesses.size).toBeGreaterThan(80_000);
   });
 });

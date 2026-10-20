@@ -1,5 +1,6 @@
 import { normalizeWord } from "../domain/normalize";
 import type { WordList } from "../domain/types";
+import dictionaryWords from "./pt-BR-words.txt?raw";
 
 const answers = [
   "AMOR", "ARTE", "CASA", "CAMA", "DADO", "FATO", "GATO", "LAGO", "MATO", "RATO", "VIDA",
@@ -20,7 +21,10 @@ const extraGuesses = [
 
 export const portugueseWords: WordList = {
   answers,
-  validGuesses: new Set([...answers, ...extraGuesses].map((word) => normalizeWord(word, "pt-BR"))),
+  validGuesses: new Set(
+    [...answers, ...extraGuesses, ...dictionaryWords.trim().split(/\r?\n/)]
+      .map((word) => normalizeWord(word, "pt-BR")),
+  ),
   minLength: 4,
   maxLength: 8,
 };

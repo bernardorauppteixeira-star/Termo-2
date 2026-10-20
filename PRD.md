@@ -54,7 +54,7 @@ O jogo é destinado a pessoas que gostam de jogos casuais de vocabulário e quer
 ### 6.2 Partida
 
 - A pessoa digita um palpite e o envia para avaliação.
-- Um palpite deve ter o tamanho exigido pela partida e estar na lista de palpites válidos daquele idioma.
+- Um palpite deve ter o tamanho exigido pela partida e estar entre as palavras aceitas para aquele idioma. Em português, o jogo também usa um dicionário offline ampliado.
 - Palpites inválidos não consomem tentativa e recebem uma mensagem clara explicando o motivo.
 - Cada palpite válido consome uma tentativa e apresenta o resultado de todas as suas letras.
 - A pessoa vence ao acertar a palavra; perde quando utiliza as seis tentativas sem acertar.
@@ -80,7 +80,8 @@ Em português, a comparação normaliza diacríticos: **A** equivale a **Á**, *
 
 ### 6.5 Seleção e política de palavras
 
-- Cada idioma tem uma lista curada de respostas e uma lista de palpites válidos. A lista de palpites pode ser mais ampla que a de respostas.
+- Cada idioma tem uma lista curada de respostas, distinta das palavras aceitas como palpites. Em português do Brasil, os palpites válidos também usam um vocabulário offline aberto e ampliado; em inglês, permanece a lista curada atual.
+- O dicionário offline é uma fonte finita e pode não conter todas as flexões, neologismos ou palavras raras do português.
 - A seleção de respostas deve evitar repetir qualquer palavra até que todas as respostas elegíveis daquele idioma tenham sido usadas.
 - Ao iniciar um novo ciclo da lista, as respostas são embaralhadas e a última resposta do ciclo anterior não deve ser escolhida imediatamente de novo.
 - As listas de respostas priorizam vocabulário comum e reconhecível para o idioma e público correspondentes.

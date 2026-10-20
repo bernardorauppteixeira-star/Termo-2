@@ -30,7 +30,7 @@ const strings = {
       empty: "Digite uma palavra antes de enviar.",
       characters: "Use apenas letras, sem espaços, números ou símbolos.",
       length: (count: number) => `A palavra precisa ter exatamente ${count} letras.`,
-      unknown: "Essa palavra não está na lista de palpites aceitos.",
+      unknown: "Essa palavra não consta no dicionário offline de palavras aceitas.",
       finished: "Esta partida terminou. Inicie uma nova sintonia.",
     },
     legend: { correct: "Na posição", present: "Em outra posição", absent: "Não aparece" },
